@@ -1,0 +1,6 @@
+butterflies_dataset/
+    Monarch/
+    Swallowtail/
+    Blue_Morpho/
+    ...
+python enchanted_wings_model.py
