@@ -1,0 +1,37 @@
+pip install pandas matplotlib seaborn plotly folium
+import pandas as pd
+
+# Load your dataset
+df = pd.read_csv("butterfly_species_dataset.csv")
+print(df.head())
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12,6))
+species_count = df['Common Name'].value_counts().head(10)
+sns.barplot(x=species_count.values, y=species_count.index, palette="Set3")
+plt.title("Top 10 Butterfly Species in Dataset")
+plt.xlabel("Count")
+plt.ylabel("Species")
+plt.show()
+family_counts = df['Family'].value_counts()
+
+plt.figure(figsize=(8,8))
+plt.pie(family_counts, labels=family_counts.index, autopct='%1.1f%%', startangle=140)
+plt.title("Butterfly Family Distribution")
+plt.axis('equal')
+plt.show()
+import folium
+
+# Starting map
+m = folium.Map(location=[20,0], zoom_start=2)
+
+# Add butterflies
+for _, row in df.iterrows():
+    if pd.notnull(row['Latitude']) and pd.notnull(row['Longitude']):
+        folium.Marker(
+            location=[row['Latitude'], row['Longitude']],
+            popup=row['Common Name']
+        ).add_to(m)
+
+m.save("butterfly_map.html")
