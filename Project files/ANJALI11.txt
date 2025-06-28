@@ -1,0 +1,64 @@
+pip install streamlit
+project/
+│
+├── enchanted_wings_model.h5        # Trained model
+├── app.py                          # Streamlit app
+├── butterflies_dataset/            # (used only for training, optional)
+└── test_images/                    # Place test images here or upload in app
+# app.py
+import streamlit as st
+import numpy as np
+from PIL import Image
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array
+
+# --------------------------
+# Load model and labels
+# --------------------------
+MODEL_PATH = "enchanted_wings_model.h5"
+model = load_model(MODEL_PATH)
+
+# Must match training labels (use train_generator.class_indices)
+labels = {
+    0: 'Blue Morpho',
+    1: 'Monarch',
+    2: 'Swallowtail',
+    3: 'Zebra Longwing',
+    4: 'Painted Lady'
+    # Add more if you trained with more classes
+}
+
+# --------------------------
+# Image Prediction Function
+# --------------------------
+def predict_butterfly(image: Image.Image):
+    img = image.resize((150, 150))
+    img_array = img_to_array(img) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+
+    prediction = model.predict(img_array)
+    pred_class = np.argmax(prediction)
+    confidence = np.max(prediction)
+
+    return labels[pred_class], confidence
+
+# --------------------------
+# Streamlit UI
+# --------------------------
+st.set_page_config(page_title="🦋 Enchanted Wings", layout="centered")
+
+st.title("🦋 ENCHANTED WINGS")
+st.subheader("Marvels of Butterfly Species - AI Classifier")
+st.write("Upload a butterfly image to predict its species.")
+
+uploaded_file = st.file_uploader("Choose a butterfly image...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    with st.spinner("Classifying..."):
+        label, confidence = predict_butterfly(image)
+        st.success(f"🧠 Prediction: **{label}** ({confidence*100:.2f}% confidence)")
+streamlit run app.py
+streamlit run app.py
